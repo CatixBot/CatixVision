@@ -9,7 +9,7 @@ class ExtractedFeatures:
         rectCenterY = int((rangeRect[0][1] + rangeRect[1][1])/2)
         frameCenterX = int(frameShape[1] / 2)
         frameCenterY = int(frameShape[0] / 2)
-        axialDeltaX = frameCenterX - rectCenterX
+        axialDeltaX = rectCenterX - frameCenterX
         axialDeltaY = frameCenterY - rectCenterY
         self.detectedCenterPoint = (rectCenterX, rectCenterY)
         self.detectedContour = rangeContour
