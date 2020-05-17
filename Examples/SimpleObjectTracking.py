@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-import SimpleObjectTracker as SOT
+import SimpleObjectDetector as sod
 
 windowName = "Pick&Find"
 captureKey = ord('r')
@@ -52,14 +52,12 @@ def showImage(imageBGR):
 
 def findObjects(colorRangesHSV):
     videoCapture = createVideoCapture()
-    rangeTracker = SOT.RangeTrackerHSV(colorRangesHSV)
+    rangeTracker = sod.RangeDetectorHSV(colorRangesHSV)
     while True:
         succeeded, capturedImage = videoCapture.read()
         if not succeeded:
             continue
         detectedFeatures = rangeTracker.detectRange(capturedImage)
-        #boundingRects = detectObjects(capturedImage, colorRangesHSV)
-        #for r in boundingRects:
         for features in detectedFeatures:
             drawDetected(capturedImage, features)
         showImage(capturedImage)
@@ -71,7 +69,7 @@ def findObjects(colorRangesHSV):
 def pickObjects():
     colorRangesHSV = []
     videoCapture = createVideoCapture()
-    rangePicker = SOT.RangePickerHSV(windowName)
+    rangePicker = sod.RangePickerHSV(windowName)
     while True:
         succeeded, capturedImage = videoCapture.read() 
         if not succeeded:

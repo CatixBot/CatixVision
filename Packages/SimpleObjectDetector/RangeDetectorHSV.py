@@ -16,7 +16,7 @@ class ExtractedFeatures:
         self.frameCenterPoint = (frameCenterX, frameCenterY)
         self.axialDelta = (axialDeltaX, axialDeltaY)
 
-class RangeTrackerHSV:
+class RangeDetectorHSV:
     def __init__(self, colorRangesHSV):
         self.__colorRangesHSV = colorRangesHSV
 
