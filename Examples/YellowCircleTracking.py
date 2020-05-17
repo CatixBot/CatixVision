@@ -1,13 +1,17 @@
 import cv2
 import numpy as np
 
+import SimpleObjectTracker as SOT
+
 windowName = "Pick&Find"
 captureKey = ord('r')
 exitKey = ord('q')
 
+videoWriter = cv2.VideoWriter('output.avi', cv2.VideoWriter_fourcc('M','J','P','G'), 24, (640, 480))
+
 def createVideoCapture():
-    frameWidth = 720
-    frameHeight = 1280
+    frameWidth = 480
+    frameHeight = 640
     videoCapture = cv2.VideoCapture(0)
     videoCapture.set(cv2.CAP_PROP_FRAME_WIDTH, frameWidth)
     videoCapture.set(cv2.CAP_PROP_FRAME_HEIGHT, frameHeight)
@@ -57,6 +61,7 @@ def extractFeatures(boundingRectCoords, frameShape):
 
 def drawObjects(imageBGR, features):
     cv2.circle(imageBGR, features[0], 10, (255, 255, 255), -1, cv2.FILLED)
+    cv2.circle(imageBGR, features[1], 10, (255, 255, 255), -1, cv2.FILLED)
     cv2.rectangle(imageBGR, features[0], features[1], (255, 255, 255), 3)
 
     fontFace = cv2.FONT_HERSHEY_SIMPLEX
@@ -76,6 +81,10 @@ def drawObjects(imageBGR, features):
 def waitKey():
     return cv2.waitKey(5) & 0xFF
 
+def showImage(imageBGR):
+    cv2.imshow(windowName, imageBGR)
+    videoWriter.write(imageBGR)
+
 def findObjects(colorRangesHSV):
     videoCapture = createVideoCapture()
     while True:
@@ -86,34 +95,26 @@ def findObjects(colorRangesHSV):
         for r in boundingRects:
             features = extractFeatures(r, capturedImage.shape)
             drawObjects(capturedImage, features)
-        cv2.imshow(windowName, capturedImage)
+        showImage(capturedImage)
         keyPressed = waitKey()
         if keyPressed == exitKey:
             break
     videoCapture.release()
 
-def selectObject(imageBGR):
-    showCrosshair = False
-    fromCenter = False
-    return cv2.selectROI(windowName, imageBGR, fromCenter, showCrosshair)    
-
 def pickObjects():
     colorRangesHSV = []
     videoCapture = createVideoCapture()
+    rangePicker = SOT.RangePickerHSV(windowName)
     while True:
         succeeded, capturedImage = videoCapture.read() 
         if not succeeded:
             continue
         keyPressed = waitKey()
         if keyPressed == captureKey:
-            x1, y1, x2, y2 = selectObject(capturedImage)
-            selectedAreaBGR = capturedImage[int(y1):int(y1 + y2), int(x1):int(x1 + x2)]
-            selectedAreaHSV = cv2.cvtColor(selectedAreaBGR, cv2.COLOR_BGR2HSV)
-            lowerBound = ([selectedAreaHSV[:,:,0].min(), selectedAreaHSV[:,:,1].min(), selectedAreaHSV[:,:,2].min()])
-            upperBound = ([selectedAreaHSV[:,:,0].max(), selectedAreaHSV[:,:,1].max(), selectedAreaHSV[:,:,2].max()])
-            colorRangesHSV.append((lowerBound, upperBound))
+            colorRange = rangePicker.pickRange(capturedImage)
+            colorRangesHSV.append((colorRange.lowerBound, colorRange.upperBound))
         else:
-            cv2.imshow(windowName, capturedImage)
+            showImage(capturedImage)
         if keyPressed == exitKey:
             break
     videoCapture.release()
@@ -121,3 +122,5 @@ def pickObjects():
 
 if __name__ == "__main__":
     findObjects(pickObjects())
+
+videoWriter.release()
