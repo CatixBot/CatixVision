@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
  
 setup(name='SimpleObjectTracker',
-    version='0.1.0',
+    version='1.0.0',
     url='https://github.com/CatixBot/CatixVision',
     license='MIT',
     author='Mikhail Uskin',
